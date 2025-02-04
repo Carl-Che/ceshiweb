@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>药盒小帮</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://g.alicdn.com/apsara-media-aui/amaui-web-aicall/1.6.2/aicall-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>药盒小帮</h1>
+            <div class="header-icon">
+                <svg viewBox="0 0 24 24" width="32" height="32">
+                    <circle cx="12" cy="12" r="11" fill="#E3F2FD" stroke="#1976D2" stroke-width="2"/>
+                    <path fill="#1976D2" d="M11 7h2v4h4v2h-4v4h-2v-4H7v-2h4V7z"/>
+                </svg>
+            </div>
+        </header>
+        
+        <main>
+            <div class="upload-section">
+                <div class="upload-box" id="uploadBox">
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <svg viewBox="0 0 24 24" width="48" height="48">
+                            <path fill="#2196F3" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                        </svg>
+                        <p>点击或拖拽图片至此处</p>
+                    </div>
+                </div>
+                <div class="preview-box" id="previewBox" hidden>
+                    <img id="previewImage" src="" alt="预览图片">
+                    <button class="clear-btn" id="clearBtn">清除</button>
+                </div>
+            </div>
+            
+            <div class="result-section">
+                <button class="scan-btn" id="scanBtn" disabled>开始识别</button>
+                <div class="result-box" id="resultBox"></div>
+            </div>
+            
+            <!-- 弹窗按钮 -->
+            <button class="video-call-btn" id="openModalBtn">启动视频通话</button>
+            
+            <!-- 弹窗 -->
+            <div id="videoModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn" id="closeModalBtn">&times;</span>
+                    <div id="root" style="width: 100%; height: 500px;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        let callUI = null;
+        const openModalBtn = document.getElementById('openModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const videoModal = document.getElementById('videoModal');
+        const rootElement = document.getElementById('root');
+
+        openModalBtn.addEventListener('click', function() {
+            videoModal.style.display = 'block';
+            if (!callUI) {
+                callUI = new ARTCAICallUI({
+                    userId: '123',  // 进入rtc的用户id，建议使用当前登录用户的UserId
+                    root: rootElement,  // 页面渲染到的节点，画面完整填充整个区域
+                    shareToken: 'eyJSZXF1ZXN0SWQiOiJDRDJBMDk1NS0xRkExLTU3OUQtQjE1MS1DNkRBOEY0QTRBM0IiLCJXb3JrZmxvd1R5cGUiOiJWaXNpb25DaGF0IiwiVGVtcG9yYXJ5QUlBZ2VudElkIjoiYTI3MDNiNTE3MjFmNDA2N2IzZjNlYTg5YTdjMzU3YTEiLCJFeHBpcmVUaW1lIjoiMjAyNS0wMi0wMyAwNzo0NzoyMCIsIk5hbWUiOiJHamRaQ2tTMSIsIlJlZ2lvbiI6ImNuLWhhbmd6aG91In0='  // 填入分享ID
+                }).render();
+            }
+        });
+
+        closeModalBtn.addEventListener('click', function() {
+            videoModal.style.display = 'none';
+            if (callUI) {
+                callUI.destroy();
+                callUI = null;
+            }
+        });
+
+        // 点击弹窗外部关闭弹窗
+        window.addEventListener('click', function(event) {
+            if (event.target == videoModal) {
+                videoModal.style.display = 'none';
+                if (callUI) {
+                    callUI.destroy();
+                    callUI = null;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
