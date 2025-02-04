@@ -42,53 +42,55 @@
                 <div class="result-box" id="resultBox"></div>
             </div>
             
-            <!-- 弹窗按钮 -->
-            <button class="video-call-btn" id="openModalBtn">启动视频通话</button>
-            
-            <!-- 弹窗 -->
-            <div id="videoModal" class="modal">
-                <div class="modal-content">
-                    <span class="close-btn" id="closeModalBtn">&times;</span>
-                    <div id="root" style="width: 100%; height: 500px;"></div>
-                </div>
+            <div class="input-section">
+                <textarea id="textInput" class="text-input" placeholder="请在此输入文本内容..."></textarea>
+                <button class="submit-btn" id="submitBtn">提交内容</button>
             </div>
         </main>
     </div>
     <script src="script.js"></script>
     <script>
-        let callUI = null;
-        const openModalBtn = document.getElementById('openModalBtn');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const videoModal = document.getElementById('videoModal');
-        const rootElement = document.getElementById('root');
+        // 获取提交按钮和文本输入框
+        const submitBtn = document.getElementById('submitBtn');
+        const textInput = document.getElementById('textInput');
 
-        openModalBtn.addEventListener('click', function() {
-            videoModal.style.display = 'block';
-            if (!callUI) {
-                callUI = new ARTCAICallUI({
-                    userId: '123',  // 进入rtc的用户id，建议使用当前登录用户的UserId
-                    root: rootElement,  // 页面渲染到的节点，画面完整填充整个区域
-                    shareToken: 'eyJSZXF1ZXN0SWQiOiJDRDJBMDk1NS0xRkExLTU3OUQtQjE1MS1DNkRBOEY0QTRBM0IiLCJXb3JrZmxvd1R5cGUiOiJWaXNpb25DaGF0IiwiVGVtcG9yYXJ5QUlBZ2VudElkIjoiYTI3MDNiNTE3MjFmNDA2N2IzZjNlYTg5YTdjMzU3YTEiLCJFeHBpcmVUaW1lIjoiMjAyNS0wMi0wMyAwNzo0NzoyMCIsIk5hbWUiOiJHamRaQ2tTMSIsIlJlZ2lvbiI6ImNuLWhhbmd6aG91In0='  // 填入分享ID
-                }).render();
+        // 添加提交按钮点击事件
+        submitBtn.addEventListener('click', async () => {
+            const text = textInput.value.trim();
+            if (!text) {
+                alert('请输入文本内容');
+                return;
             }
-        });
 
-        closeModalBtn.addEventListener('click', function() {
-            videoModal.style.display = 'none';
-            if (callUI) {
-                callUI.destroy();
-                callUI = null;
-            }
-        });
+            try {
+                resultBox.innerHTML = '<div class="loading">正在分析中...</div>';
+                const response = await fetch('http://localhost:3000/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: [{
+                            role: 'user',
+                            content: `请帮我分析这段药品说明书的主要信息：\n${text}`
+                        }]
+                    })
+                });
 
-        // 点击弹窗外部关闭弹窗
-        window.addEventListener('click', function(event) {
-            if (event.target == videoModal) {
-                videoModal.style.display = 'none';
-                if (callUI) {
-                    callUI.destroy();
-                    callUI = null;
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || '请求失败');
                 }
+
+                const aiResponse = data.choices?.[0]?.message?.content || '无法解析文本信息';
+                resultBox.innerHTML = `<div class="result-content">
+                    <h3>原始文本：</h3>
+                    <p>${text}</p>
+                    <h3>分析结果：</h3>
+                    <p>${aiResponse}</p>
+                </div>`;
+            } catch (error) {
+                resultBox.innerHTML = `<p style="color: red;">分析失败：${error.message}</p>`;
             }
         });
     </script>
