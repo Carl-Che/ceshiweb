@@ -6,7 +6,6 @@
     <title>药盒小帮</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://g.alicdn.com/apsara-media-aui/amaui-web-aicall/1.6.2/aicall-ui.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -53,6 +52,7 @@
         // 获取提交按钮和文本输入框
         const submitBtn = document.getElementById('submitBtn');
         const textInput = document.getElementById('textInput');
+        const resultBox = document.getElementById('resultBox');
 
         // 添加提交按钮点击事件
         submitBtn.addEventListener('click', async () => {
@@ -71,6 +71,9 @@
                     },
                     body: JSON.stringify({
                         messages: [{
+                            role: 'system',
+                            content: '你是一个专业的药品说明书分析助手，请帮助用户分析药品说明书的主要信息，包括用途、用法用量、禁忌事项等关键信息。'
+                        }, {
                             role: 'user',
                             content: `请帮我分析这段药品说明书的主要信息：\n${text}`
                         }]
@@ -83,14 +86,18 @@
                 }
 
                 const aiResponse = data.choices?.[0]?.message?.content || '无法解析文本信息';
+                const formattedResponse = aiResponse.replace(/\n/g, '<br>');
                 resultBox.innerHTML = `<div class="result-content">
                     <h3>原始文本：</h3>
-                    <p>${text}</p>
+                    <p>${text.replace(/\n/g, '<br>')}</p>
                     <h3>分析结果：</h3>
-                    <p>${aiResponse}</p>
+                    <p>${formattedResponse}</p>
                 </div>`;
             } catch (error) {
-                resultBox.innerHTML = `<p style="color: red;">分析失败：${error.message}</p>`;
+                console.error('Error:', error);
+                resultBox.innerHTML = `<div class="result-content">
+                    <p style="color: red;">分析失败：${error.message}</p>
+                </div>`;
             }
         });
     </script>

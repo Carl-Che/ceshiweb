@@ -67,50 +67,36 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 识别按钮事件
-    scanBtn.addEventListener('click', () => {
+    scanBtn.addEventListener('click', async () => {
         resultBox.innerHTML = '';
         resultBox.classList.add('loading');
         scanBtn.disabled = true;
 
-        Tesseract.recognize(
-            previewImage.src,
-            'chi_sim+eng', // 设置为中文和英文
-            {
-                logger: info => console.log(info)
-            }
-        ).then(async ({ data: { text } }) => {
-            try {
-                // 发送识别文本到后端API
-                const response = await fetch('http://localhost:3000/api/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        messages: [
-                            {
-                                role: 'user',
-                                content: `这是一个药品说明书的文本内容，请帮我分析主要信息：\n${text}`
-                            }
-                        ]
-                    })
-                });
-                
-                const data = await response.json();
-                const aiResponse = data.output.text || '无法解析药品信息';
-                resultBox.innerHTML = `<div class="result-content">
-                    <h3>原始文本：</h3>
-                    <p>${text}</p>
-                    <h3>分析结果：</h3>
-                    <p>${aiResponse}</p>
-                </div>`;
-            } catch (error) {
-                resultBox.innerHTML = `<p style="color: red;">分析失败：${error.message}</p>`;
-            }
-        }).catch(error => {
-            resultBox.innerHTML = `<p style="color: red;">识别失败：${error.message}</p>`;
-        }).finally(() => {
+        try {
+            // 获取图片文件
+            const response = await fetch(previewImage.src);
+            const blob = await response.blob();
+            const formData = new FormData();
+            formData.append('image', blob);
+
+            // 发送图片数据到后端API
+            const apiResponse = await fetch('http://localhost:3002/api/image', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await apiResponse.json();
+            const aiResponse = data.choices?.[0]?.message?.content || '无法解析药品信息';
+            
+            resultBox.innerHTML = `<div class="result-content">
+                <h3>分析结果：</h3>
+                <p>${aiResponse.replace(/\n/g, '<br>')}</p>
+            </div>`;
+        } catch (error) {
+            resultBox.innerHTML = `<p style="color: red;">分析失败：${error.message}</p>`;
+        } finally {
+            resultBox.classList.remove('loading');
             scanBtn.disabled = false;
-        });
+        }
     });
 });

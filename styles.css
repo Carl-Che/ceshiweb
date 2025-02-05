@@ -143,6 +143,18 @@ h1 {
 .result-box {
     margin-top: 25px;
     padding: 25px;
+    line-height: 1.6;
+}
+
+.result-content h3 {
+    margin: 15px 0 10px;
+    color: var(--primary-color);
+}
+
+.result-content p {
+    margin: 10px 0;
+    white-space: pre-line;
+    color: #333;
     background: linear-gradient(135deg, #FFFFFF, var(--secondary-color));
     border-radius: 12px;
     min-height: 120px;
