@@ -80,12 +80,17 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('image', blob);
 
             // 发送图片数据到后端API
-            const apiResponse = await fetch('http://localhost:3002/api/image', {
+            const apiResponse = await fetch('http://localhost:3000/api/image', {
                 method: 'POST',
                 body: formData
             });
             
             const data = await apiResponse.json();
+            if (!apiResponse.ok || data.error) {
+                const errorDetails = data.details ? `\n详细信息：${data.details}` : '';
+                const requestInfo = data.requestData ? `\n请求数据：${JSON.stringify(data.requestData, null, 2)}` : '';
+                throw new Error(`${data.error || '请求失败'}${errorDetails}${requestInfo}`);
+            }
             const aiResponse = data.choices?.[0]?.message?.content || '无法解析药品信息';
             
             resultBox.innerHTML = `<div class="result-content">

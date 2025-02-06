@@ -1,14 +1,18 @@
 import OpenAI from "openai";
+import dotenv from 'dotenv';
+
+// 加载环境变量
+dotenv.config();
 
 try {
     const openai = new OpenAI(
         {
-            apiKey: "sk-956ff0915b4b4dc2b82f13a182866e0c",
-            baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+            apiKey: process.env.ARK_API_KEY,
+            baseURL: "https://ark.cn-beijing.volces.com/api/v3"
         }
     );
     const completion = await openai.chat.completions.create({
-        model: "qwen-plus",  //模型列表：https://help.aliyun.com/zh/model-studio/getting-started/models
+        model: "ep-20250205224209-nbg44",  // 火山引擎模型ID
         messages: [
             { role: "system", content: "You are a helpful assistant." },
             { role: "user", content: "你是谁？" }

@@ -11,39 +11,41 @@
     <div class="container">
         <header>
             <h1>药盒小帮</h1>
-            <div class="header-icon">
-                <svg viewBox="0 0 24 24" width="32" height="32">
-                    <circle cx="12" cy="12" r="11" fill="#E3F2FD" stroke="#1976D2" stroke-width="2"/>
-                    <path fill="#1976D2" d="M11 7h2v4h4v2h-4v4h-2v-4H7v-2h4V7z"/>
-                </svg>
-            </div>
         </header>
         
         <main>
-            <div class="upload-section">
-                <div class="upload-box" id="uploadBox">
-                    <input type="file" id="fileInput" accept="image/*" hidden>
-                    <div class="upload-content">
-                        <svg viewBox="0 0 24 24" width="48" height="48">
-                            <path fill="#2196F3" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-                        </svg>
-                        <p>点击或拖拽图片至此处</p>
+            <div class="content-wrapper">
+                <div class="left-column">
+                    <h2>图片识别区域</h2>
+                    <div class="upload-section">
+                        <div class="upload-box" id="uploadBox">
+                            <input type="file" id="fileInput" accept="image/*" hidden>
+                            <div class="upload-content">
+                                <svg viewBox="0 0 24 24" width="48" height="48">
+                                    <path fill="#2196F3" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                                </svg>
+                                <p>点击或拖拽图片至此处</p>
+                            </div>
+                        </div>
+                        <div class="preview-box" id="previewBox" hidden>
+                            <img id="previewImage" src="" alt="预览图片">
+                            <button class="clear-btn" id="clearBtn">清除</button>
+                        </div>
+                    </div>
+                    
+                    <div class="result-section">
+                        <button class="scan-btn" id="scanBtn" disabled>开始识别</button>
+                        <div class="result-box" id="resultBox"></div>
                     </div>
                 </div>
-                <div class="preview-box" id="previewBox" hidden>
-                    <img id="previewImage" src="" alt="预览图片">
-                    <button class="clear-btn" id="clearBtn">清除</button>
+                
+                <div class="right-column">
+                    <h2>文字输入区域</h2>
+                    <div class="input-section">
+                        <textarea id="textInput" class="text-input" placeholder="请在此输入文本内容..."></textarea>
+                        <button class="submit-btn" id="submitBtn">提交内容</button>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="result-section">
-                <button class="scan-btn" id="scanBtn" disabled>开始识别</button>
-                <div class="result-box" id="resultBox"></div>
-            </div>
-            
-            <div class="input-section">
-                <textarea id="textInput" class="text-input" placeholder="请在此输入文本内容..."></textarea>
-                <button class="submit-btn" id="submitBtn">提交内容</button>
             </div>
         </main>
     </div>

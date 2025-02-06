@@ -2,11 +2,15 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
+const imageRouter = require('./routes/image');
 
 const app = express();
 app.use(cors());
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb', extended: true}));
+
+// 图片识别API路由
+app.use('/api/image', imageRouter);
 
 // 文本生成API路由
 app.post('/api/chat', async (req, res) => {
@@ -20,20 +24,18 @@ app.post('/api/chat', async (req, res) => {
         console.log('发送请求数据:', JSON.stringify({ messages }, null, 2));
 
         const requestBody = {
-            model: 'qwen-plus',
-            input: {
-                messages: messages
-            }
+            model: 'ep-20250205224209-nbg44',
+            messages: messages
         };
 
         console.log('API请求体:', JSON.stringify(requestBody, null, 2));
 
-        const response = await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
+        const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${process.env.DASHSCOPE_API_KEY}`,
+                'Authorization': `Bearer ${process.env.ARK_API_KEY}`,
                 'Content-Type': 'application/json',
-                'X-DashScope-SSE': 'disable'
+                'Accept': 'application/json'
             },
             body: JSON.stringify(requestBody)
         });
@@ -59,17 +61,17 @@ app.post('/api/chat', async (req, res) => {
 
         console.log('API响应数据:', JSON.stringify(data, null, 2));
 
-        if (data.code || !data.output) {
+        if (data.error) {
             console.error('API返回异常数据:', data);
             return res.status(500).json({
-                error: data.message || data.error?.message || 'API返回数据格式错误'
+                error: data.error?.message || 'API返回数据格式错误'
             });
         }
 
         const responseData = {
             choices: [{
                 message: {
-                    content: data.output.text
+                    content: data.choices[0].message.content
                 }
             }]
         };
@@ -86,36 +88,8 @@ app.post('/api/chat', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-// 检查端口是否被占用
-const net = require('net');
-const server = net.createServer();
-
-server.once('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-        console.log(`端口 ${PORT} 已被占用，正在尝试关闭占用的进程...`);
-        // 在 Windows 和 Unix 系统上尝试关闭占用端口的进程
-        const { execSync } = require('child_process');
-        try {
-            if (process.platform === 'win32') {
-                execSync(`netstat -ano | findstr :${PORT}`);
-            } else {
-                execSync(`lsof -i :${PORT} | grep LISTEN | awk '{print $2}' | xargs kill -9`);
-            }
-            console.log(`成功释放端口 ${PORT}`);
-            startServer();
-        } catch (error) {
-            console.error(`无法释放端口 ${PORT}:`, error);
-            process.exit(1);
-        }
-    }
-});
-
-server.once('listening', () => {
-    server.close();
-    startServer();
-});
-
-server.listen(PORT);
+// 直接启动服务器
+startServer();
 
 function startServer() {
     app.listen(PORT)
